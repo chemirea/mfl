@@ -110,16 +110,11 @@ fn compile() {
 }
 
 fn run_repl() {
-    // use self::inkwell::support::add_symbol;
-    let mut display_lexer_output = false;
-    let mut display_parser_output = false;
-    let mut display_compiler_output = false;
+    let mut verbose = false;
 
     for arg in std::env::args() {
         match arg.as_str() {
-            "--dl" => display_lexer_output = true,
-            "--dp" => display_parser_output = true,
-            "--dc" => display_compiler_output = true,
+            "-V" => verbose = true,
             _ => (),
         }
     }
@@ -171,7 +166,7 @@ fn run_repl() {
         prec.insert('/', 40);
 
         // 入力の解析および表示(optionall)
-        if display_lexer_output {
+        if verbose {
             println!(
                 "-> Attempting to parse lexed input: \n{:?}\n",
                 Lexer::new(input.as_str()).collect::<Vec<Token>>()
@@ -191,7 +186,7 @@ fn run_repl() {
             Ok(fun) => {
                 let is_anon = fun.is_anon;
 
-                if display_parser_output {
+                if verbose {
                     if is_anon {
                         println!("-> Expression parsed: \n{:?}\n", fun.body);
                     } else {
@@ -201,13 +196,6 @@ fn run_repl() {
 
                 match Compiler::compile(&context, &builder, &fpm, &module, &fun) {
                     Ok(function) => {
-                        if display_compiler_output {
-                            // Not printing a new line since LLVM automatically
-                            // prefixes the generated string with one
-                            print_flush!("-> Expression compiled to IR:");
-                            function.print_to_stderr();
-                        }
-
                         if !is_anon {
                             // only add it now to ensure it is correct
                             previous_exprs.push(fun);
