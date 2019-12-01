@@ -398,8 +398,28 @@ impl<'a, 'ctx> Compiler<'a, 'ctx> {
     }
 
     /// Inkwellコンテキストを利用して、指定されたfunctionをコンパイルする
-    #[allow(dead_code)]
     pub fn compile(
+        context: &'ctx Context,
+        builder: &'a Builder<'ctx>,
+        pass_manager: &'a PassManager<FunctionValue<'ctx>>,
+        module: &'a Module<'ctx>,
+        function: &Function,
+    ) -> Result<FunctionValue<'ctx>, &'static str> {
+        let mut compiler = Compiler {
+            context: context,
+            builder: builder,
+            fpm: pass_manager,
+            module: module,
+            function: function,
+            fn_value_opt: None,
+            variables: HashMap::new(),
+        };
+
+        compiler.compile_fn()
+    }
+
+    #[allow(dead_code)]
+    pub fn compile_to_ll(
         context: &'ctx Context,
         builder: &'a Builder<'ctx>,
         pass_manager: &'a PassManager<FunctionValue<'ctx>>,

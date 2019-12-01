@@ -98,9 +98,13 @@ fn compile() {
     // make module
     let module = context.create_module("main");
 
-    match Parser::new(input, &mut prec).parse() {
-        Ok(fun) => {
-            Compiler::compile(&context, &builder, &fpm, &module, &fun).unwrap();
+    match Parser::new(input, &mut prec).parse_program() {
+        Ok(funs) => {
+            // 以前に解析された全ての関数を新しいモジュールに再コンパイル
+            for fun in &funs {
+                Compiler::compile(&context, &builder, &fpm, &module, fun)
+                    .expect("Cannot re-add previously compiled function.");
+            }
         }
         Err(err) => {
             println!("!> Error parsing expression: {}", err);
@@ -196,6 +200,11 @@ fn run_repl() {
 
                 match Compiler::compile(&context, &builder, &fpm, &module, &fun) {
                     Ok(function) => {
+                        if verbose {
+                            print_flush!("-> Expression compiled to IR:");
+                            function.print_to_stderr();
+                        }
+
                         if !is_anon {
                             // only add it now to ensure it is correct
                             previous_exprs.push(fun);

@@ -59,6 +59,9 @@ pub struct Function {
     pub is_anon: bool,
 }
 
+/// プログラムは関数の集まりと定義
+pub type Program = Vec<Function>;
+
 /// 式パーサーを表す
 #[derive(Debug)]
 pub struct Parser<'a> {
@@ -84,6 +87,17 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// programとしてパーサーの中身を解析
+    pub fn parse_program(&mut self) -> Result<Program, &'static str> {
+        let mut program = Vec::new();
+        loop {
+            program.push(self.parse()?);
+            if self.at_end() {
+                return Ok(program);
+            }
+        }
+    }
+
     /// パーサーの中身を解析
     pub fn parse(&mut self) -> Result<Function, &'static str> {
         let result = match self.current()? {
@@ -95,7 +109,7 @@ impl<'a> Parser<'a> {
         match result {
             Ok(result) => {
                 if !self.at_end() {
-                    Err("Unexpected token after parsed expression.")
+                    Ok(result)
                 } else {
                     Ok(result)
                 }
