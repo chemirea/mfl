@@ -1,9 +1,13 @@
-extern putchar(n)
+extern print_d(n)
 
-def add(x, y)
-    x + y
+def fib(n)
+    if n < 2 then
+        n
+    else 
+        fib(n-1) + fib(n-2)
 
 def main()
-    var n = 2,
-        m = 120
-    in putchar(add(n, m))
+    var 
+        x = fib(43)
+    in
+        print_d(x)
